@@ -1,5 +1,5 @@
-import { ActivePorts } from './port_listing.js'
-
+import { ActivePorts } from './port_listing.js';
+import { future } from 'fibers/futures';
 
 export default class PiBrainEnvrionment {
 
@@ -41,7 +41,7 @@ export const launch = {
 	name: 'launch_environment',
 
 
-	run({user_id,bindings}) {
+	run(bindings) {
 
 
 		/*
@@ -54,25 +54,44 @@ export const launch = {
 		"name"=>"pibrain-dev-session-PORT"
 
 		}*/
+		var future = new Future();
+		
+		const ngrok_request = bindings['ngrok_request'];
 
-		var ngrok_request = bindings['ngrok_request'];
-
-		var shipyard_request = bindings['shipyard_request'];
-
+		const shipyard_request = bindings['shipyard_request'];
+		const responses = {};
 
 		bindings.ports.map((port,i) =>(
 			function() {
 				
-				HTTP.post("http://localhost:4040/",ngrok_request, 
+				let mod_ngrok_request = Object.assign({},ngrok_request)
+				let open_port = PiBrainEnvrionment._open_port()
+				mod_ngrok_request['subdomain'] = mod_ngrok_request['subdomain']+open_port;
+				mod_ngrok_request['name'] = mod_ngrok_request['name']+open_port;
+
+				HTTP.post("http://localhost:4040/",mod_ngrok_request, 
 					function(err,response) {
+						if(err) {
+							throw new Meteor.error(err.code,err.response);
+						}
+						responses
 
 					}
 				);
-			}
+
+			}()
 		))
 
 
 		HTTP.post("http://localhost:8080/", shipyard_request, function(err,response) {
+			
+			if (err) {
+				throw new Meteor.error(err.code, err.response);
+				return
+			}
+
+			console.log(response)
+			return response
 
 		});
 

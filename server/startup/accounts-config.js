@@ -1,25 +1,52 @@
-import { genSaltSync as genSalt } from "bcrypt";
+import { genSaltSync as genSalt, hashSync as hash } from "bcrypt";
 
 Accounts.onCreateUser(function(options, user) {
-  console.log(options)
-  console.log(user)
 
-  var salt = genSalt(10);
-  var request = {
-    username: user.services.github.username,
-    password: passwordCreation(),
-    role: "read"
+
+
+  const admin_auth = {
+
+    username: process.env.ADMIN_USERNAME,
+    password: process.env.ADMIN_PASSWORD
+
   }
   //X-Service-Key
-  HTTP.post("http://localhost:8080/api/accounts", request, function(err,response) {
-    console.log(err,response)
-  });
-  HTTP.post("http://localhost:8080/api/accounts", request, function(err,response) {
-    console.log(err,response)
-  });
+  HTTP.post("http://localhost:8080/auth/login", admin_auth, 
+    function(err,response) {
+      
+      if (err) {
+        throw new Meteor.error(err.code, err.response);
+        return
+      }
+          
+      const creation_request = {
+        headers: {
+          'X-Auth-Token': response.auth_token
+        },
+        username: user.services.github.username,
+        password: passwordCreation(),
+        role: "containers:read"
+      }
+      
+      const save_login = {
+        username: request.username,
+        password: hash(request.password,salt)
+      }
+      
+      options.shipyard_creds = save_login;
 
+      access = response.auth_token
+      HTTP.post("http://localhost:8080/api/accounts", creation_request, 
+        function(err,response) {
+          console.log(err,response)
+        }
+      );
+    
+      console.log(err)
+    }
+  );
 
-})
+});
 
 
 var passwordCreation = function() {

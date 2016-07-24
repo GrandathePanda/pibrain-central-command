@@ -90,8 +90,8 @@ export default class SelectPage extends Component {
 		
 		var style = {
 			backgroundColor: "#1e1e1e",
-			height: "96px",
-			width: "96px",
+			height: "64px",
+			width: "64px",
 			position: "relative",
 			order: place.toString(),
 			display: "block",
