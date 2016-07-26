@@ -57,7 +57,7 @@ export default class SelectPage extends Component {
 
 	logout_style() {
 		var style = {
-			//backgroundColor: "#febece",
+	
 			height: "15%",
 			width: "60%",
 			position: "absolute",
@@ -73,7 +73,7 @@ export default class SelectPage extends Component {
 	portal_grid_style() {
 
 		var style = {
-			//backgroundColor: "#febece",
+			
 			height: "60%",
 			width: "90%",
 			position: "absolute",
