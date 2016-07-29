@@ -49,7 +49,7 @@ export default class AddEnvModal extends Component {
 			left: "10%",
 			padding: "10% 0 0 0",
 			margin: "0",
-			top: "20%",
+			top: "80%",
 			opacity: "1.0"
 		};
 
@@ -104,8 +104,8 @@ class EnvFields extends Component {
 
 					
 					<div style={this.input_wrapper_style("2")}>
-						<p>{"Choose container to run:"}</p>
-						<input style={this.input_style()} type="dropdown" value={this.state.containers}  onChange={this.handle_container_change.bind(this)} />
+						<p>{"Choose image to run:"}</p>
+						<OptionsBar />
 					</div>
 
 
@@ -132,11 +132,6 @@ class EnvFields extends Component {
 		});
   	}
 
-  	handle_container_change(event) {
-  		this.setState({
-  			container_value: event.target.value
-  		});
-  	}
 
   	handle_command_change(event) {
   		this.setState({
@@ -174,8 +169,10 @@ class EnvFields extends Component {
   		
   		var style = {
   			display: "block",
+  			height: "30px",
   			width: "50%",
   			marginLeft: "25%",
+  			border: "0",
   			borderRadius: "10px"
   		}
 
@@ -205,7 +202,9 @@ class EnvFields extends Component {
   			paddingBottom: "5%",
   			display: "flex",
   			flexDirection: "column",
+  			flexWrap: "wrap",
   			background: "#1e1e1e",
+  			color: "white",
   			order: "1"
 
   		}
@@ -261,7 +260,6 @@ class PortBox extends Component {
 	}
 
 	render_ports(ports) {
-		console.log(ports)
 		return (
 			<div className="portList" style={this.port_list_style()}>
 				{ports.map((port,i) => (
@@ -366,25 +364,6 @@ class PortBox extends Component {
 	}
 }
 
-class OptionsBar extends Component {
-	
-	render(props) {
-		<select value="B">
-			{this.load_container_list()}
-  		</select>
-	}
-
-	load_container_list() {
-
-		return (
-
-			<option value="A">Apple</option>
-		
-		)
-
-	}
-}
-
 
 class SinglePort extends Component {
 
@@ -414,20 +393,88 @@ class SinglePort extends Component {
 
 
 
-export default createContainer(() => {
+class OptionsBar extends Component {
 
-	bindings = {
+	constructor(props) {
+
+		super(props)
+		let bindings = {
+			type: "post",
+			route: "/images/json",
+			request: {
+				headers: {
+					"X-Access-Token":"admin:$2a$10$Lm7gfpccrDRjjocZjJ92cO4dNVPuVZBcJw8UtxEH7hrrUkSB/KKmK"
+					//`${Meteor.user.profile.sy_un}:${Meteor.user.profile.sy_token}`//username:+":"+auth_token
+				},
+				body: {
+					all: true
+				}
+			}
+		}
+
+		this.state = {
+			docker_images: [],
+			selected_image: ""
+		}
+
+		var result = new Promise((resolve,reject) => {
+			
+			Meteor.call('shipyard_request', bindings, function(err, response) {
+
+					if(err) reject(err);
+
+					resolve(response);
+
+			})
+		
+
+
+		}).then((val) => {
+
+				this.setState({docker_images:val.data});
+		
+		})
 
 	}
-	Meteor.call('shipyard_request', bindings, function(err,response) {
+	
+	render(props) {
+		return (
+			<div>
+				<select onChange={this.handle_change.bind(this)} value={this.state.selected_image} >
+					{
+						this.state.docker_images.map((val,i) => (
+							<option value={val.RepoTags[0].toString()} key={val.Id.toString()}>
+								{val.RepoTags[0].toString()}
+							</option>
+						))
 
-		return {
-			availibleEnvironments: response
-		};
+					}
+		  		</select>
+		  	</div>
+  		)
+	}
 
-	});
+	handle_change(event) {
+
+		this.setState({
+			selected_image: event.target.value
+		});
+
+	}
+
+}
 
 
-}, OptionsBar);
+
+
+
+
+
+
+
+
+
+
+
 
 

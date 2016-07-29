@@ -16,7 +16,7 @@ Accounts.onLogin(function() {
   	HTTP.get("https://api.github.com/orgs/piBrain/members",{
   			params: {'access_token': auth}
   		},
-  		function(error,response){
+  		function(error,response) {
   			var c_user_name = Meteor.user()
   				.services.github.username
   			if(error === null) {
@@ -28,7 +28,36 @@ Accounts.onLogin(function() {
   				Meteor.logout()
   			}
   
-  			if(confirmed == false ) Meteor.logout()
+  			if(confirmed == false ) {
+          Meteor.logout()
+          return;
+        }
+
+
+          const user_login = {
+            type: "post",
+            route: "/auth/login",
+            request: {
+
+              data: {
+                username: Meteor.user.
+                password: process.env.ADMIN_PASSWORD
+              }
+            }
+          }
+
+          Meteor.call('shipyard_request', user_login, function(err, response) {
+
+              if(err) {
+                reject(err);
+              }
+              else {
+                resolve(response);
+              }
+          })  
+
+
+
 
         
   		}

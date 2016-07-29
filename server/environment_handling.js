@@ -1,5 +1,6 @@
-import { Future } from 'fibers';
+import Future from 'fibers/future';
 import { ActivePorts } from '../imports/api/port_listing.js'
+
 
 export const ngrok_request = {
 	name: 'ngrok_request',
@@ -28,6 +29,7 @@ export const ngrok_request = {
 
 			HTTP.post("http://localhost:4040/",mod_bindings, 
 				function(err,response) {
+
 					if(err) {
 						future.return(err);
 					}
@@ -66,12 +68,20 @@ export const shipyard_request = {
 
 		const future = new Future();
 
-		HTTP.post("http://localhost:8080/", shipyard_request, function(err,response) {
+		HTTP.call(bindings.type,"http://localhost:8080"+bindings.route, bindings.request, function(err,response) {
+
+			if (err) {
+				console.log('err',err)
+				future.return(err);
+
+			}
+			else {
+
 			
-			if (err) future.return(err);
+				future.return( response );
+
+			}	
 			
-			
-			future.return( response);
 		});
 
 		return future.wait();
@@ -85,7 +95,7 @@ export const shipyard_request = {
 		}
 	
 
-		Meteor.apply(this.name, [args], options, callback);
+		return Meteor.apply(this.name, [args], options, callback);
 
 	}
 }
@@ -93,10 +103,10 @@ export const shipyard_request = {
 
 Meteor.methods({
 	[ngrok_request.name]: function (args) {
-		ngrok_request.run.call(this,args)
+		return ngrok_request.run.call(this,args)
 	},
 
 	[shipyard_request.name]: function(args) {
-		shipyard_request.run.call(this,args)
+		return  shipyard_request.run.call(this,args)
 	},
 })

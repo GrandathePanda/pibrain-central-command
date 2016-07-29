@@ -1,53 +1,83 @@
 import { genSaltSync as genSalt, hashSync as hash } from "bcrypt";
+import { Meteor } from 'meteor/meteor';
 
+if(Meteor.isServer) {
 Accounts.onCreateUser(function(options, user) {
 
-
-
-  const admin_auth = {
-
-    username: process.env.ADMIN_USERNAME,
-    password: process.env.ADMIN_PASSWORD
-
-  }
   //X-Service-Key
-  HTTP.post("http://localhost:8080/auth/login", admin_auth, 
-    function(err,response) {
-      
-      if (err) {
-        throw new Meteor.error(err.code, err.response);
-        return
-      }
-          
-      const creation_request = {
-        headers: {
-          'X-Auth-Token': response.auth_token
-        },
-        username: user.services.github.username,
-        password: passwordCreation(),
-        role: "containers:read"
-      }
-      
-      const save_login = {
-        username: request.username,
-        password: hash(request.password,salt)
-      }
-      
-      options.shipyard_creds = save_login;
 
-      access = response.auth_token
-      HTTP.post("http://localhost:8080/api/accounts", creation_request, 
-        function(err,response) {
-          console.log(err,response)
+  const password = passwordCreation();
+  const username = user.services.github.username
+  const salt = genSalt(10)
+
+  const save_login = {
+    sy_un: username,
+    sy_pass: hash(password,salt),
+    salt: salt
+  }
+
+  user.sy_login = save_login;
+
+
+
+  let result = new Promise((resolve,reject) => {
+   
+      const admin_login = {
+        type: "post",
+        route: "/auth/login",
+        request: {
+
+          data: {
+            username: process.env.ADMIN_USERNAME,
+            password: process.env.ADMIN_PASSWORD
+          }
         }
-      );
-    
-      console.log(err)
-    }
-  );
+      }
 
-});
+      Meteor.call('shipyard_request', admin_login, function(err, response) {
 
+          if(err) {
+            reject(err);
+          }
+          else {
+            resolve(response);
+          }
+      })       
+  
+  }).then((val) => {
+      
+      let auth_token = `${process.env.ADMIN_USERNAME}:${JSON.parse(val.content).auth_token}`
+      const creation_request = {
+        type: "post",
+        route: "/api/accounts",
+        request: {
+          headers: {
+            'X-Access-Token': auth_token
+          },
+          data: {
+            username: username,
+            password: password,
+            roles: ["containers","images:ro"]  
+          }
+        }
+      }   
+      Meteor.call('shipyard_request', creation_request, function(err, response) {
+            if(err) {
+              throw new Meteor.erro(err)
+            }
+            else {
+              console.log("User Creation Process Finished With: "+response.statusCode)
+            }
+      })
+
+
+  })
+
+  return user
+
+})
+
+}
 
 var passwordCreation = function() {
 
