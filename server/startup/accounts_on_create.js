@@ -1,4 +1,3 @@
-import { genSaltSync as genSalt, hashSync as hash } from "bcrypt";
 import { Meteor } from 'meteor/meteor';
 
 if(Meteor.isServer) {
@@ -8,17 +7,16 @@ Accounts.onCreateUser(function(options, user) {
 
   const password = passwordCreation();
   const username = user.services.github.username
-  const salt = genSalt(10)
+
 
   const save_login = {
     sy_un: username,
-    sy_pass: hash(password,salt),
-    salt: salt
+    sy_pass: password
   }
 
   user.sy_login = save_login;
 
-
+  user.profile = options.profile
 
   let result = new Promise((resolve,reject) => {
    
@@ -38,10 +36,11 @@ Accounts.onCreateUser(function(options, user) {
 
           if(err) {
             reject(err);
+            return
           }
-          else {
-            resolve(response);
-          }
+
+          resolve(response);
+
       })       
   
   }).then((val) => {
@@ -62,12 +61,14 @@ Accounts.onCreateUser(function(options, user) {
         }
       }   
       Meteor.call('shipyard_request', creation_request, function(err, response) {
+
             if(err) {
               throw new Meteor.erro(err)
+              return
             }
-            else {
-              console.log("User Creation Process Finished With: "+response.statusCode)
-            }
+      
+            console.log("User Creation Process Finished With: "+response.statusCode)
+            
       })
 
 

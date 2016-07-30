@@ -4,20 +4,48 @@ import { Meteor } from 'meteor/meteor';
 
 import { createContainer } from 'meteor/react-meteor-data';
 
+import { AppEnvironments } from '../api/environment_collection.js'
+
+import EnvironmentHandler from '../api/environment_handler.js'
+
 
 export default class AddEnvModal extends Component {
+
+	constructor(props) {
+		super(props) 
+		this.state = {
+			env_command : "",
+			env_ports : [],
+			env_name : "",
+			env_image : ""
+		}
+
+	}
 
 	render() {
 		return (
 			<div style={this.inner_div_style()}>
-				<img src={'../images/x_button.png'} style={this.x_button_style()} />
-				<EnvFields />
-				<button style={this.submit_style()} onClick={this.submit_values.bind(this)} />
+				<EnvFields resolveState={this.resolve_state.bind(this)}/>
+				<button style={this.submit_style()} onClick={this.sub_vals.bind(this)}> {"Add"} </button>
 			</div>
 		)
 	}
 
 
+	resolve_state(env_hash) {
+
+		this.setState( {
+			env_command: env_hash.command || this.state.env_command,
+			env_ports: env_hash.ports || this.state.env_ports,
+			env_name: env_hash.name || this.state.env_name,
+			env_image: env_hash.image || this.state.env_image
+		} )
+
+	}
+
+	sub_vals() {
+		EnvironmentHandler.create_new_environment(this.state)
+	}
 	submit_style() {
 
 		var style = {
@@ -33,6 +61,8 @@ export default class AddEnvModal extends Component {
 
 	}
 
+
+
 	submit_values() {
 
 	}
@@ -43,13 +73,13 @@ export default class AddEnvModal extends Component {
 			backgroundColor: "#480CE8",
 			boxShadow: "-1px 9px 26px -1px rgba(0,0,0,0.75)",
 			textAlign: "center", 
-			height: "35%",
+			height: "65%",
 			width: "80%",
 			position: "absolute",
 			left: "10%",
 			padding: "10% 0 0 0",
 			margin: "0",
-			top: "80%",
+			top: "20%",
 			opacity: "1.0"
 		};
 
@@ -73,6 +103,15 @@ export default class AddEnvModal extends Component {
 
 }
 
+export default createContainer(() => {
+
+	Meteor.subscribe('app_environments')
+	return {
+
+		appEnvironments: AppEnvironments,
+	};
+}, AddEnvModal);
+
 
 
 class EnvFields extends Component {
@@ -83,7 +122,6 @@ class EnvFields extends Component {
 
 		this.state = {
 			name_value: "",
-			container_value: "",
 			command_value: ""  
 		}
 
@@ -99,26 +137,26 @@ class EnvFields extends Component {
 					
 					<div style={this.input_wrapper_style("1")}>
 						<p>{"Environment Name:"}</p>
-						<input style={this.input_style()} type="text" value={this.state.name} onChange={this.handle_name_change.bind(this)}  />
+						<input style={this.input_style()} type="text" value={this.state.name} onChange={this.handle_name_resolution.bind(this)}  />
 					</div>
 
 					
 					<div style={this.input_wrapper_style("2")}>
 						<p>{"Choose image to run:"}</p>
-						<OptionsBar />
+						<OptionsBar resolveState = {this.props.resolveState}/>
 					</div>
 
 
 					<div style={this.input_wrapper_style("3")}>
-						<p>{"Enter for container to run on start:"}</p>
-						<input style={this.input_style()} type="text" value={this.state.command} onChange={this.handle_command_change.bind(this)} />
+						<p>{"Enter command for container to run on start:"}</p>
+						<input style={this.input_style()} type="text" value={this.state.command} onChange={this.handle_command_resolution.bind(this)} />
 					</div>
 
 				</div>
 					
 				<div className="envPortOptions" style={this.port_box_wrapper_style("2")}>
 					<p>{"Enter ports used in container:"}</p>
-					<PortBox style={this.port_box_style()}/>
+					<PortBox style={this.port_box_style()}  resolveState = {this.props.resolveState}/>
 				</div>
 
 			</div>
@@ -126,18 +164,14 @@ class EnvFields extends Component {
 
 	}
 
-	handle_name_change(event) {
-		this.setState({
-			name_value: event.target.value.substr(0, 140)
-		});
-  	}
+	handle_name_resolution(event) {
+		this.props.resolveState({name:event.target.value});
+	} 
 
+	handle_command_resolution(event) {
+		this.props.resolveState({command:event.target.value});
+	}
 
-  	handle_command_change(event) {
-  		this.setState({
-  			command_value: event.target.value.substr(0, 140)
-  		});
-  	}
 
 
   	field_container_style() {
@@ -237,7 +271,7 @@ class PortBox extends Component {
 		super(props)
 
 	    this.state = {
-	          current_ports: ["1234","3434","34343","34344","12074","9998"],
+	          current_ports: [],
 	          port_value: "",
 
 	    };
@@ -279,6 +313,7 @@ class PortBox extends Component {
 			port_value: event.target.value.substr(0, 5)
 		});
 
+
 	}
 
 	handle_new_port() {
@@ -294,6 +329,8 @@ class PortBox extends Component {
 			current_ports: c_ports,
 			port_value: ""
 		});
+
+		this.props.resolveState({ports:c_ports})
 
 		
 	}
@@ -399,12 +436,12 @@ class OptionsBar extends Component {
 
 		super(props)
 		let bindings = {
-			type: "post",
+			type: "get",
 			route: "/images/json",
 			request: {
 				headers: {
-					"X-Access-Token":"admin:$2a$10$Lm7gfpccrDRjjocZjJ92cO4dNVPuVZBcJw8UtxEH7hrrUkSB/KKmK"
-					//`${Meteor.user.profile.sy_un}:${Meteor.user.profile.sy_token}`//username:+":"+auth_token
+					"X-Access-Token": Session.get('access_token')
+					//`//username:+":"+auth_token
 				},
 				body: {
 					all: true
@@ -432,6 +469,8 @@ class OptionsBar extends Component {
 		}).then((val) => {
 
 				this.setState({docker_images:val.data});
+				console.log(val.data)
+				this.props.resolveState({image:val.data[0].RepoTags[0].toString()})
 		
 		})
 
@@ -443,7 +482,7 @@ class OptionsBar extends Component {
 				<select onChange={this.handle_change.bind(this)} value={this.state.selected_image} >
 					{
 						this.state.docker_images.map((val,i) => (
-							<option value={val.RepoTags[0].toString()} key={val.Id.toString()}>
+							<option value={val.RepoTags[0].toString()} key={i}>
 								{val.RepoTags[0].toString()}
 							</option>
 						))
@@ -460,21 +499,8 @@ class OptionsBar extends Component {
 			selected_image: event.target.value
 		});
 
+		this.props.resolveState({image:event.target.value})
+
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

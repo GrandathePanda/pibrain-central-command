@@ -9,9 +9,17 @@ import { ActivePorts } from '../api/port_listing.js'
 import EnvironmentSelector from './environment_selector.jsx'
 import AccountsWrapper from './accounts_wrapper.jsx';
 
+import AddEnvModal from './add_env_modal.jsx'
+
 export default class SelectPage extends Component {
 
+	constructor(props) {
+		super(props)
+		this.state = {
+			add_env_open: false,
+		}
 
+	}
 
 	renderEnvironmentChoices() {
 
@@ -23,11 +31,22 @@ export default class SelectPage extends Component {
 
 	}
 
+	trigger_add_env_modal() {
+		this.setState({add_env_open: !this.state.add_env_open })
+	}
+
+	renderAddEnvModal() {
+		if(this.state.add_env_open) return <AddEnvModal />
+		return
+	}
+
 	render(props) {
 		return (
 			<div className="portal_page" style={this.style()}>
 				<div className="portal_items" style={this.portal_grid_style()}>
-					{this.renderEnvironmentChoices()}
+					<button style={this.open_modal_button_style()} onClick={this.trigger_add_env_modal.bind(this)} >{"Add Env"}</button>
+					{ this.renderAddEnvModal() } 
+					{ this.renderEnvironmentChoices() }
 				</div>
 				<div style={this.logout_style()}>
 					<AccountsWrapper />
@@ -54,6 +73,20 @@ export default class SelectPage extends Component {
 		return style;
 	}
 
+	open_modal_button_style() {
+		var style = {
+		
+			//height: "25px",
+			width: "50px",
+			position: "absolute",
+			left: "90%",
+			padding: "0 0 0 0",
+			margin: "0",
+			top: "5%"
+		};
+
+		return style;
+	}
 
 	logout_style() {
 		var style = {
@@ -78,7 +111,7 @@ export default class SelectPage extends Component {
 			width: "90%",
 			position: "absolute",
 			left: "5%",
-			display: "flex-box",
+			display: "flex",
 			margin: "0",
 			top: "5%"
 		};

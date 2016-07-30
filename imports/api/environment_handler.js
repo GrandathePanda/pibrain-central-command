@@ -31,4 +31,129 @@ export default class EnvironmentHandler {
 	}
 
 
+	static create_new_environment(modal_bindings) {
+		console.log(modal_bindings)
+		let valid = modal_bindings.env_name &&
+					modal_bindings.env_ports &&
+					modal_bindings.env_image &&
+					modal_bindings.env_command
+		
+		if ( valid == false) return
+
+		let ports = {} 
+
+		modal_bindings.env_ports.map((port) => {
+			ports[port] = ""
+		})
+
+		console.log(ports)
+
+		const creation_request = {
+			_id: modal_bindings.env_name,
+			type: "post",
+			route: "/containers/create",
+			request: {
+			  headers: {
+			  },
+			  data: 
+			  {
+	  		
+	  		       // "Hostname": "",
+	  		       // "Domainname": "",
+	  		       // "User": "",
+	  		       // "AttachStdin": false,
+	  		       // "AttachStdout": true,
+	  		       // "AttachStderr": true,
+	  		       // "Tty": false,
+	  		       // "OpenStdin": false,
+	  		       // "StdinOnce": false,
+	  		       // "Env": [
+	  		       // ],
+	  		       "Cmd": modal_bindings.env_command,
+	  		       // "Entrypoint": "",
+	  		       "Image": modal_bindings.env_image,
+	  		       // "Labels": {
+	  		       //         "com-example-vendor": "piBrain",
+	  		       //         "com-example-version": "0.1"
+	  		       // },
+	  		       // "Volumes": {
+	  		       //   "/volumes/data": {}
+	  		       // },
+	  		       // "WorkingDir": "/home/desktop",
+	  		       // "NetworkDisabled": false,
+	  		       // "MacAddress": "12:34:56:78:9a:bc",
+	  		       "ExposedPorts": ports,
+	  		       "StopSignal": "SIGTERM",
+	  		      //  "HostConfig": {
+	  		      //    "Binds": ["/tmp:/tmp"],
+	  		      //    "Links": ["redis3:redis"],
+	  		      //    "Memory": 0,
+	  		      //    "MemorySwap": 0,
+	  		      //    "MemoryReservation": 0,
+	  		      //    "KernelMemory": 0,
+	  		      //    "CpuPercent": 80,
+	  		      //    "CpuShares": 512,
+	  		      //    "CpuPeriod": 100000,
+	  		      //    "CpuQuota": 50000,
+	  		      //    "CpusetCpus": "0,1",
+	  		      //    "CpusetMems": "0,1",
+	  		      //    "MaximumIOps": 0,
+	  		      //    "MaximumIOBps": 0,
+	  		      //    "BlkioWeight": 300,
+	  		      //    "BlkioWeightDevice": [{}],
+	  		      //    "BlkioDeviceReadBps": [{}],
+	  		      //    "BlkioDeviceReadIOps": [{}],
+	  		      //    "BlkioDeviceWriteBps": [{}],
+	  		      //    "BlkioDeviceWriteIOps": [{}],
+	  		      //    "MemorySwappiness": 60,
+	  		      //    "OomKillDisable": false,
+	  		      //    "OomScoreAdj": 500,
+	  		      //    "PidMode": "",
+	  		      //    "PidsLimit": -1,
+	  		      //    "PortBindings": { "22/tcp": [{ "HostPort": "11022" }] },
+	  		      //    "PublishAllPorts": false,
+	  		      //    "Privileged": false,
+	  		      //    "ReadonlyRootfs": false,
+	  		      //    "Dns": ["8.8.8.8"],
+	  		      //    "DnsOptions": [""],
+	  		      //    "DnsSearch": [""],
+	  		      //    "ExtraHosts": null,
+	  		      //    "VolumesFrom": ["parent", "other:ro"],
+	  		      //    "CapAdd": ["NET_ADMIN"],
+	  		      //    "CapDrop": ["MKNOD"],
+	  		      //    "GroupAdd": ["newgroup"],
+	  		      //    "RestartPolicy": { "Name": "", "MaximumRetryCount": 0 },
+	  		      //    "NetworkMode": "bridge",
+	  		      //    "Devices": [],
+	  		      //    "Ulimits": [{}],
+	  		      //    "LogConfig": { "Type": "json-file", "Config": {} },
+	  		      //    "SecurityOpt": [],
+	  		      //    "StorageOpt": {},
+	  		      //    "CgroupParent": "",
+	  		      //    "VolumeDriver": "",
+	  		      //    "ShmSize": 67108864
+	  		      // },
+	  		      // "NetworkingConfig": {
+	  		      // "EndpointsConfig": {
+	  		      //     "isolated_nw" : {
+	  		      //         "IPAMConfig": {
+	  		      //             "IPv4Address":"172.20.30.33",
+	  		      //             "IPv6Address":"2001:db8:abcd::3033",
+	  		      //             "LinkLocalIPs":["169.254.34.68", "fe80::3468"]
+	  		      //         },
+	  		      //         "Links":["container_1", "container_2"],
+	  		      //         "Aliases":["server_x", "server_y"]
+	  		      //     }
+	  		      // }
+	  		  }
+			  
+			}
+		}
+	
+		console.log(creation_request)
+		AppEnvironments.insert(creation_request);
+
+	}
+
+
 }

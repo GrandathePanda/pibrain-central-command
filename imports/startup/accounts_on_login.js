@@ -1,12 +1,6 @@
 import { Accounts } from 'meteor/accounts-base';
+import { Meteor } from 'meteor/meteor';
 
-
-Accounts.ui.config({
-	passwordSignupFields: 'USERNAME_AND_EMAIL',
-	requestPermissions: {
-    	github: ['user','read:org']
-  	},
-});
 
 Accounts.onLogin(function() {
 	
@@ -17,7 +11,9 @@ Accounts.onLogin(function() {
   			params: {'access_token': auth}
   		},
   		function(error,response) {
-  			var c_user_name = Meteor.user()
+
+        var user = Meteor.user();
+  			var c_user_name = user
   				.services.github.username
   			if(error === null) {
   				response.data.map((user) => (
@@ -33,33 +29,28 @@ Accounts.onLogin(function() {
           return;
         }
 
-
-          const user_login = {
-            type: "post",
-            route: "/auth/login",
-            request: {
-
-              data: {
-                username: Meteor.user.
-                password: process.env.ADMIN_PASSWORD
-              }
+        const user_login = {
+          type: "post",
+          route: "/auth/login",
+          request: {
+            data: {
+              username: user.sy_login.sy_un,
+              password: user.sy_login.sy_pass
             }
           }
-
-          Meteor.call('shipyard_request', user_login, function(err, response) {
-
+        }
+        new Promise((resolve,reject) => {
+          Meteor.call('shipyard_request',user_login, (err, response) => {
               if(err) {
-                reject(err);
+                reject(err)
+                return
               }
-              else {
-                resolve(response);
-              }
-          })  
+              resolve(response)
+          })
+        }).then((val) => { 
+          Session.set('access_token', user.sy_login.sy_un+":"+JSON.parse(val.content).auth_token)
+        })
 
-
-
-
-        
   		}
     ) 
 })
