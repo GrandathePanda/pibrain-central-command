@@ -11,10 +11,13 @@ import AccountsWrapper from './accounts_wrapper.jsx';
 
 import AddEnvModal from './add_env_modal.jsx'
 
+import EnvironmentHandler from '../api/environment_handler.js'
+
 export default class SelectPage extends Component {
 
 	constructor(props) {
 		super(props)
+		this._env_builder = new EnvironmentHandler()
 		this.state = {
 			add_env_open: false,
 		}
@@ -25,7 +28,13 @@ export default class SelectPage extends Component {
 
 		return this.props.availibleEnvironments.map((env,i) => (
 			
-			<EnvironmentSelector img={env.src} key={env.env_string} envBindings={env.env_bindings} style={this.env_selector_style(i)}/>
+			<EnvironmentSelector 
+				img={env.icon} 
+				key={env._id}  
+				currentUser={this.props.currentUser} 
+				style={this.env_selector_style(i)}
+				launch={this.initialize_environment.bind(this,env.query_object)}
+			/>
 
 		));
 
@@ -35,8 +44,20 @@ export default class SelectPage extends Component {
 		this.setState({add_env_open: !this.state.add_env_open })
 	}
 
+	initialize_environment(bindings) {
+
+   		if (! this.props.currentUser() ) {
+      		throw new Meteor.Error('not-authorized');
+    	}
+
+		var env = this._env_builder.build(bindings);
+
+		env.launch(this.props.currentUser)
+
+	}
+
 	renderAddEnvModal() {
-		if(this.state.add_env_open) return <AddEnvModal />
+		if(this.state.add_env_open) return <AddEnvModal currentUser={this.props.currentUser} closeMe={this.trigger_add_env_modal.bind(this)}/>
 		return
 	}
 
@@ -146,6 +167,7 @@ export default createContainer(() => {
 	Meteor.subscribe('active_ports')
 	return {
 		availibleEnvironments: AppEnvironments.find().fetch(),
+		currentUser: Meteor.user
 	};
 
 }, SelectPage);

@@ -1,6 +1,7 @@
 import { ActivePorts } from './port_listing.js';
 
 
+
 export default class PiBrainEnvrionment {
 
 	constructor(bindings) {
@@ -8,21 +9,72 @@ export default class PiBrainEnvrionment {
 		this._docker_name = null;
 		this._docker_id = null;
 		this._docker_application = null;
-		this._launch_bindings = bindings.launch;
-		this._kill_bindings = bindings.kill;
+		this._bindings = bindings;
 	}
 
-	launch_env(user_id) {
+	launch(user_id) {
+		const open_ports = []
+		this._bindings.ports.map((port,i) => {
+			this._docker_ports.push(this.return_and_block_port())
+		})
+		const ngrok_bindings = 
+		{
+			route: "api/tunnels",
+			type: "post",
+			ports: this._bindings.ports,
+			open_ports: this._docker_ports,
+			request: {
+				headers: {
+					"content-type": "application/json"
+				},
+				data: {
+					proto: "http"
+				}
+			}
+		}
 
-		ngrok_request.call(user_id,this._launch_bindings.ngrok)
-		shipyard_request.call(user_id,this._launch_bindings.shipyard)
+		const shipyard_bindings = Object.assign({},this._bindings)
+		
+	
+
+		shipyard_bindings.request.headers['X-Access-Token'] = Session.get('access_token');
+		console.log(shipyard_bindings)
+		new Promise((resolve,reject) => {
+			Meteor.call('ngrok_request', ngrok_bindings, function(err,response) {
+				if(err) {
+					reject(err)
+					return
+				}
+
+				resolve(response)
+			})
+		}).then((val) => {
+			console.log(val)
+			window.open(val.public_url)
+		})
+
+		new Promise((resolve,reject) => {
+			Meteor.call('shipyard_request', shipyard_bindings, function(err,response) {
+				if(err) {
+					reject(err)
+					return
+				}
+
+				resolve(response)
+			})
+		}).then((val) => {
+			console.log(val)
+		})
+
 
 
 	}
 
 	kill(user_id) {
 
-		make_env_request.call(user_id,this._kill_bindings)
+		// Meteor.call('ngrok_request', user_id,this._ng_kill_bindings)
+
+		// Meteor.call('shipyard_request', user_id,this._sy_kill_bindings)
 
 	}
 

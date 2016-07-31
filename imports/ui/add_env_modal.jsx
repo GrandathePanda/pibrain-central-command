@@ -8,6 +8,9 @@ import { AppEnvironments } from '../api/environment_collection.js'
 
 import EnvironmentHandler from '../api/environment_handler.js'
 
+import Dropzone from 'react-dropzone'
+
+
 
 export default class AddEnvModal extends Component {
 
@@ -17,7 +20,8 @@ export default class AddEnvModal extends Component {
 			env_command : "",
 			env_ports : [],
 			env_name : "",
-			env_image : ""
+			env_image : "",
+			env_icon: null
 		}
 
 	}
@@ -38,13 +42,20 @@ export default class AddEnvModal extends Component {
 			env_command: env_hash.command || this.state.env_command,
 			env_ports: env_hash.ports || this.state.env_ports,
 			env_name: env_hash.name || this.state.env_name,
-			env_image: env_hash.image || this.state.env_image
+			env_image: env_hash.image || this.state.env_image,
+			env_icon: env_hash.icon || this.state.env_icon
 		} )
 
 	}
 
 	sub_vals() {
+
+		if (! this.props.currentUser() ) {
+  	 		throw new Meteor.Error('not-authorized');
+	 	}
+	 	console.log(this.state.env_icon,this.state.env_icon.preview)
 		EnvironmentHandler.create_new_environment(this.state)
+		//this.props.closeMe();
 	}
 	submit_style() {
 
@@ -61,22 +72,16 @@ export default class AddEnvModal extends Component {
 
 	}
 
-
-
-	submit_values() {
-
-	}
-
 	inner_div_style() {
 		
 		var style = {
 			backgroundColor: "#480CE8",
 			boxShadow: "-1px 9px 26px -1px rgba(0,0,0,0.75)",
 			textAlign: "center", 
-			height: "65%",
-			width: "80%",
+			height: "80%",
+			width: "90%",
 			position: "absolute",
-			left: "10%",
+			left: "5%",
 			padding: "10% 0 0 0",
 			margin: "0",
 			top: "20%",
@@ -122,7 +127,8 @@ class EnvFields extends Component {
 
 		this.state = {
 			name_value: "",
-			command_value: ""  
+			command_value: "",
+			image_preview: null
 		}
 
 
@@ -159,6 +165,15 @@ class EnvFields extends Component {
 					<PortBox style={this.port_box_style()}  resolveState = {this.props.resolveState}/>
 				</div>
 
+				<div className="envImage" style={this.input_wrapper_style(3)}>
+					<div style={this.dropzone_wrapper_style()}>
+						<Dropzone onDrop={this.onDrop.bind(this)} multiple={false} accept={"image/png"}>
+							<p>{"Envrionment Icon, drop here."}</p>
+							{this.state.image_preview != null ? <img src={this.state.image_preview} style={this.image_preview_style()} /> : null }
+						</Dropzone>
+					</div>
+				</div>
+
 			</div>
 		)
 
@@ -170,6 +185,36 @@ class EnvFields extends Component {
 
 	handle_command_resolution(event) {
 		this.props.resolveState({command:event.target.value});
+	}
+
+	dropzone_wrapper_style() {
+
+		var style = {
+			position: "relative",
+			background: "#eeeeee",
+
+		};
+
+		return style;
+
+	}
+
+
+	image_preview_style() {
+
+		var style = {
+			position: "relative",
+			height: "64px",
+			width: "64px"
+		};
+
+		return style;
+
+	}
+
+	onDrop(file) {
+		this.setState({image_preview: file[0].preview});
+		this.props.resolveState({icon:file[0]});
 	}
 
 

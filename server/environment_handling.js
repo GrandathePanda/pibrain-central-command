@@ -6,7 +6,7 @@ export const ngrok_request = {
 	name: 'ngrok_request',
 
 
-	run(bindings,args=null) {		
+	run(bindings) {		
 		/*
 		Ngrok Request Structure From DB
 		{
@@ -22,18 +22,22 @@ export const ngrok_request = {
 
 		bindings.ports.map((port,i) => {
 
-			let mod_ngrok_request = Object.assign({},bindings);
-			let open_port = args.open_port[i]
-			mod_bindings.subdomain += open_port;
-			mod_bindings.name += open_port;
+			let mod_bindings = Object.assign({},bindings.request);
+			let open_port = bindings.open_ports[i]
+			mod_bindings.data.subdomain = `dev-${open_port}`;
+			mod_bindings.data.name = `dev-${open_port}`;
+			mod_bindings.data.addr = open_port.toString();
 
-			HTTP.post("http://localhost:4040/",mod_bindings, 
+			HTTP.call(bindings.type,"http://localhost:4040/"+bindings.route,mod_bindings, 
 				function(err,response) {
 
 					if(err) {
-						future.return(err);
+						console.log(err)
+						responses[i.toString()] = err
+						return
 					}
-					responses["ngrok_"+open_port.toString()] = response
+				
+					responses[i.toString()] = response
 
 				}
 			);
@@ -66,6 +70,7 @@ export const shipyard_request = {
 		
 	run(bindings,args=null) {
 
+		console.log(bindings)
 		const future = new Future();
 
 		HTTP.call(bindings.type,"http://localhost:8080"+bindings.route, bindings.request, function(err,response) {
@@ -99,6 +104,8 @@ export const shipyard_request = {
 
 	}
 }
+
+
 
 
 Meteor.methods({
