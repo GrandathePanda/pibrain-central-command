@@ -59,7 +59,7 @@ export default class EnvironmentHandler {
 				  headers: {
 				  	"Content-Type": "application/json",
 				  },
-				  data: 
+				  content: 
 				  {
 		  		
 		  		       // "Hostname": "",
@@ -73,9 +73,9 @@ export default class EnvironmentHandler {
 		  		       // "StdinOnce": false,
 		  		       // "Env": [
 		  		       // ],
-		  		       "Cmd": modal_bindings.env_command,
+		  		       Cmd: modal_bindings.env_command,
 		  		       // "Entrypoint": "",
-		  		       "Image": modal_bindings.env_image,
+		  		       Image: modal_bindings.env_image,
 		  		       // "Labels": {
 		  		       //         "com-example-vendor": "piBrain",
 		  		       //         "com-example-version": "0.1"
@@ -86,8 +86,8 @@ export default class EnvironmentHandler {
 		  		       // "WorkingDir": "/home/desktop",
 		  		       // "NetworkDisabled": false,
 		  		       // "MacAddress": "12:34:56:78:9a:bc",
-		  		       "ExposedPorts": ports,
-		  		       "StopSignal": "SIGTERM",
+		  		       ExposedPorts: ports,
+		  		       StopSignal: "SIGTERM",
 		  		      //  "HostConfig": {
 		  		      //    "Binds": ["/tmp:/tmp"],
 		  		      //    "Links": ["redis3:redis"],

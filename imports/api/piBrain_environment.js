@@ -38,7 +38,6 @@ export default class PiBrainEnvrionment {
 	
 
 		shipyard_bindings.request.headers['X-Access-Token'] = Session.get('access_token');
-		console.log(shipyard_bindings)
 		new Promise((resolve,reject) => {
 			Meteor.call('ngrok_request', ngrok_bindings, function(err,response) {
 				if(err) {
@@ -53,6 +52,9 @@ export default class PiBrainEnvrionment {
 			window.open(val.public_url)
 		})
 
+
+		console.log(shipyard_bindings)
+		
 		new Promise((resolve,reject) => {
 			Meteor.call('shipyard_request', shipyard_bindings, function(err,response) {
 				if(err) {
