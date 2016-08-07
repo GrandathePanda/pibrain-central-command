@@ -24,7 +24,6 @@ Accounts.onCreateUser(function(options, user) {
         type: "post",
         route: "/auth/login",
         request: {
-
           data: {
             username: process.env.ADMIN_USERNAME,
             password: process.env.ADMIN_PASSWORD

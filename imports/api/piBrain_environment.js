@@ -14,8 +14,11 @@ export default class PiBrainEnvrionment {
 
 	launch(user_id) {
 		const open_ports = []
+		let host_port_bindings = {}
 		this._bindings.ports.map((port,i) => {
-			this._docker_ports.push(this.return_and_block_port())
+			let port_val = this.return_and_block_port()
+			host_port_bindings[port.toString()] = [{"HostPort":port_val.toString()}] 
+			this._docker_ports.push(port_val)
 		})
 		const ngrok_bindings = 
 		{
@@ -38,22 +41,11 @@ export default class PiBrainEnvrionment {
 	
 
 		shipyard_bindings.request.headers['X-Access-Token'] = Session.get('access_token');
-		new Promise((resolve,reject) => {
-			Meteor.call('ngrok_request', ngrok_bindings, function(err,response) {
-				if(err) {
-					reject(err)
-					return
-				}
+		
 
-				resolve(response)
-			})
-		}).then((val) => {
-			console.log(val)
-			window.open(val.public_url)
-		})
-
-
-		console.log(shipyard_bindings)
+		shipyard_bindings
+			.request.data
+			.HostConfig.PortBindings = host_port_bindings
 		
 		new Promise((resolve,reject) => {
 			Meteor.call('shipyard_request', shipyard_bindings, function(err,response) {
@@ -65,7 +57,64 @@ export default class PiBrainEnvrionment {
 				resolve(response)
 			})
 		}).then((val) => {
-			console.log(val)
+			 let id = JSON.parse(val.content).Id
+			 const attach_docker_bindings = {
+			 	 type: "post",
+			 	 route: `/containers/${id}/attach`,
+			 	 request: {
+			 	 	headers: {
+			 	 		"X-Access-Token": Session.get('access_token'),
+			 	 		"Content-Type": "application/json"
+			 	 	}
+			 	 }
+			 }
+			 return new Promise((resolve,reject) => {
+			 	 Meteor.call('shipyard_request', attach_docker_bindings, function(err,response) {
+			 	 	if(err) {
+			 	 		console.log(err)
+			 	 		reject(err)
+			 	 		return
+			 	 	}
+
+			 	 	resolve(id)
+			 	 })
+			 })
+		}).then((val) => {
+			 const start_docker_bindings = {
+			 	type: "post",
+			 	route: `/containers/${val}/start`,
+			 	request: {
+			 		headers: {
+			 			"X-Access-Token": Session.get('access_token'),
+			 			"Content-Type": "application/json"
+			 		}
+			 	}
+			 }
+			 return new Promise((resolve,reject) => {
+				 Meteor.call('shipyard_request', start_docker_bindings, function(err,response) {
+				 	if(err) {
+				 		reject(err)
+				 		return
+				 	}
+
+				 	resolve(response)
+				 })
+			 })
+
+		}).then((val) => {
+			return new Promise((resolve,reject) => {
+				Meteor.call('ngrok_request', ngrok_bindings, function(err,response) {
+					if(err) {
+						reject(err)
+						return
+					}
+
+					resolve(response)
+				})
+			})
+		}).then((val) => {
+			window.open(val.public_url)
+			
 		})
 
 

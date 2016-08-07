@@ -70,13 +70,12 @@ export const shipyard_request = {
 		
 	run(bindings,args=null) {
 
-		console.log(bindings)
 		const future = new Future();
 
 		HTTP.call(bindings.type,"http://localhost:8080"+bindings.route, bindings.request, function(err,response) {
 
 			if (err) {
-				console.log('err',err)
+	
 				future.return(err);
 
 			}

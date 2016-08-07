@@ -40,13 +40,14 @@ export default class EnvironmentHandler {
 					modal_bindings.env_icon
 		if ( valid == false) return
 
-		let ports = {} 
+		let container_ports = {} 
 
 		modal_bindings.env_ports.map((port) => {
-			ports[port] = ""
+			container_ports[port] = {}
 		})
 
 
+		console.log(modal_bindings.env_command.split(','))
 		const creation_request = {
 			_id: modal_bindings.env_name,
 			icon: modal_bindings.env_icon,
@@ -59,7 +60,7 @@ export default class EnvironmentHandler {
 				  headers: {
 				  	"Content-Type": "application/json",
 				  },
-				  content: 
+				  data: 
 				  {
 		  		
 		  		       // "Hostname": "",
@@ -68,14 +69,14 @@ export default class EnvironmentHandler {
 		  		       // "AttachStdin": false,
 		  		       // "AttachStdout": true,
 		  		       // "AttachStderr": true,
-		  		       // "Tty": false,
-		  		       // "OpenStdin": false,
+		  		       "Tty": true,
+		  		       "OpenStdin": true,
 		  		       // "StdinOnce": false,
 		  		       // "Env": [
 		  		       // ],
-		  		       Cmd: modal_bindings.env_command,
+		  		       "Cmd": modal_bindings.env_command.split(','),
 		  		       // "Entrypoint": "",
-		  		       Image: modal_bindings.env_image,
+		  		       "Image": modal_bindings.env_image,
 		  		       // "Labels": {
 		  		       //         "com-example-vendor": "piBrain",
 		  		       //         "com-example-version": "0.1"
@@ -86,9 +87,9 @@ export default class EnvironmentHandler {
 		  		       // "WorkingDir": "/home/desktop",
 		  		       // "NetworkDisabled": false,
 		  		       // "MacAddress": "12:34:56:78:9a:bc",
-		  		       ExposedPorts: ports,
-		  		       StopSignal: "SIGTERM",
-		  		      //  "HostConfig": {
+		  		       "ExposedPorts": container_ports,
+		  		       // "StopSignal": "SIGTERM",
+		  		       "HostConfig": {
 		  		      //    "Binds": ["/tmp:/tmp"],
 		  		      //    "Links": ["redis3:redis"],
 		  		      //    "Memory": 0,
@@ -148,7 +149,7 @@ export default class EnvironmentHandler {
 		  		      //         "Links":["container_1", "container_2"],
 		  		      //         "Aliases":["server_x", "server_y"]
 		  		      //     }
-		  		      // }
+		  		    }
 		  		  }
 				  
 				}
