@@ -25,8 +25,8 @@ Accounts.onCreateUser(function(options, user) {
         route: "/auth/login",
         request: {
           data: {
-            username: process.env.ADMIN_USERNAME,
-            password: process.env.ADMIN_PASSWORD
+            username: Meteor.settings.ADMIN_USERNAME,
+            password: Meteor.settings.ADMIN_PASSWORD
           }
         }
       }

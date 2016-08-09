@@ -17,37 +17,48 @@ export const ngrok_request = {
 		"name"=>"pibrain-dev-session-PORT"
 
 		}*/
-		const future = new Future();
-		const responses = {};
+		if(bindings.ports !== undefined) {
+			return Promise.all(bindings.ports.map((port,i) => {
 
-		bindings.ports.map((port,i) => {
+				let mod_bindings = Object.assign({},bindings.request);
+				let open_port = bindings.open_ports[i]
+				mod_bindings.data.subdomain = `dev-${open_port}`;
+				mod_bindings.data.name = `dev-${open_port}`;
+				mod_bindings.data.addr = open_port.toString();
 
-			let mod_bindings = Object.assign({},bindings.request);
-			let open_port = bindings.open_ports[i]
-			mod_bindings.data.subdomain = `dev-${open_port}`;
-			mod_bindings.data.name = `dev-${open_port}`;
-			mod_bindings.data.addr = open_port.toString();
+				return new Promise((resolve,reject) => {
+					HTTP.call(bindings.type,"http://localhost:4040/"+bindings.route,mod_bindings, 
+					function(err,response) {
 
-			HTTP.call(bindings.type,"http://localhost:4040/"+bindings.route,mod_bindings, 
+						if(err) {
+							console.log(err)
+							reject(err)
+							return
+						}
+						
+						resolve(response)
+
+					}
+				)});
+
+			}));
+		}
+		else {
+			return new Promise((resolve,reject) => {
+				HTTP.call(bindings.type,"http://localhost:4040/"+bindings.route,bindings.request, 
 				function(err,response) {
 
 					if(err) {
 						console.log(err)
-						responses[i.toString()] = err
+						reject(err)
 						return
 					}
-				
-					responses[i.toString()] = response
+					
+					resolve(response)
 
 				}
-			);
-
-			if(i == bindings.ports.length-1) future.return(responses)	
-		});
-
-
-		return future.wait();
-
+			)});
+		}
 
 	},
 
@@ -75,7 +86,7 @@ export const shipyard_request = {
 		HTTP.call(bindings.type,"http://localhost:8080"+bindings.route, bindings.request, function(err,response) {
 
 			if (err) {
-	
+				console.log(err)
 				future.return(err);
 
 			}

@@ -53,7 +53,6 @@ export default class AddEnvModal extends Component {
 		if (! this.props.currentUser() ) {
   	 		throw new Meteor.Error('not-authorized');
 	 	}
-	 	console.log(this.state.env_icon,this.state.env_icon.preview)
 		EnvironmentHandler.create_new_environment(this.state)
 		//this.props.closeMe();
 	}

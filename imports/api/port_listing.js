@@ -23,7 +23,7 @@ ActivePorts.allow({
   },
   remove: function (userId, doc) {
 
-    return (Meteor.user() && true)
+    return true
   }
 });
 
@@ -34,7 +34,7 @@ ActivePorts.deny({
   },
   remove: function (userId, doc) {
     // can't remove locked documents
-    return doc.locked;
+    false
   },
   fetch: ['locked'] // no need to fetch 'owner'
 });

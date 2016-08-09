@@ -76,6 +76,10 @@ export default class SelectPage extends Component {
 		)
 	}
 
+	componentWillUnmount() {
+	    this._env_builder.kill_all_envs()  
+	}
+
 	style() {
 
 		var style = {

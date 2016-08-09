@@ -8,6 +8,7 @@ export default class PiBrainEnvrionment {
 		this._docker_ports = [];
 		this._docker_name = null;
 		this._docker_id = null;
+		this._ngrok_urls = []
 		this._docker_application = null;
 		this._bindings = bindings;
 	}
@@ -58,7 +59,8 @@ export default class PiBrainEnvrionment {
 			})
 		}).then((val) => {
 			 let id = JSON.parse(val.content).Id
-			 const attach_docker_bindings = {
+			 this._docker_id = JSON.parse(val.content).Id
+			 let attach_docker_bindings = {
 			 	 type: "post",
 			 	 route: `/containers/${id}/attach`,
 			 	 request: {
@@ -80,7 +82,7 @@ export default class PiBrainEnvrionment {
 			 	 })
 			 })
 		}).then((val) => {
-			 const start_docker_bindings = {
+			 let start_docker_bindings = {
 			 	type: "post",
 			 	route: `/containers/${val}/start`,
 			 	request: {
@@ -108,25 +110,107 @@ export default class PiBrainEnvrionment {
 						reject(err)
 						return
 					}
-
+					console.log(response)
 					resolve(response)
 				})
 			})
 		}).then((val) => {
-			window.open(val.public_url)
-			
+			val.map((response) => {
+				let url = JSON.parse(response.content).public_url
+				window.open(url)
+				this._ngrok_urls.push(url)
+
+			})
 		})
 
 
 
 	}
 
-	kill(user_id) {
+	kill() {
 
-		// Meteor.call('ngrok_request', user_id,this._ng_kill_bindings)
+		var ng_kill = this._ng_kill()
+		var sy_kill = this._sy_kill()
+		this._docker_ports.map((port) => {
+			ActivePorts.remove({ _id: port.toString() })
+		})
+		return [ng_kill,sy_kill]
 
-		// Meteor.call('shipyard_request', user_id,this._sy_kill_bindings)
+	}
 
+	_sy_kill() {
+
+		let sy_stop_bindings = {
+			route: `/containers/${this._docker_id}/stop`,
+			type: "post",
+			request: {
+				headers: {
+					'X-Access-Token': Session.get('access_token')
+				}
+			}
+		}
+		return new Promise((resolve,reject) => {
+			Meteor.call('shipyard_request',sy_stop_bindings, function(err,response) {
+				if(err) {
+					reject(err)
+					return
+				}
+				resolve(response)
+			}) 
+		}).then((val) => {
+			let sy_remove_bindings = {
+				route: `/containers/${this._docker_id}`,
+				type: "delete",
+				request: {
+					headers: {
+						'X-Access-Token': Session.get('access_token')
+					}
+				}
+			}
+			return new Promise((resolve,reject) => {
+				Meteor.call('shipyard_request',sy_remove_bindings, function(err,response) {
+					if(err) {
+						reject(err)
+						return
+					}
+					resolve(response)
+				}) 
+			})
+		})
+		
+	}
+
+	_ng_kill() {
+		return Promise.all(this._ngrok_urls.map((url) => {
+			let ng_kill_bindings_https = {
+				route: `api/tunnels/${url.substring(8,17)}`,
+				type: "delete"
+			}
+			new Promise((resolve,reject) => {
+				Meteor.call('ngrok_request',ng_kill_bindings_https, function(err,response) {
+					if(err) {
+						reject(err)
+						return
+					}
+					resolve(response)
+				}) 
+			}).then((val) => {
+				let ng_kill_bindings_http = {
+					route: `api/tunnels/${url.substring(8,17)} (http)`,
+					type: "delete"
+				}
+				return new Promise((resolve,reject) => {
+					Meteor.call('ngrok_request',ng_kill_bindings_http, function(err,response) {
+						if(err) {
+							reject(err)
+							return
+						}
+						resolve(response)
+					}) 
+				})
+
+			})
+		}))
 	}
 
 	return_and_block_port() {
@@ -137,7 +221,7 @@ export default class PiBrainEnvrionment {
 		while(not_found) {
 			let port = Math.floor(Math.random() * (50000 - 10000 + 1)) + 10000;
 			if(!taken_ports[port.toString()]) {
-				ActivePorts.insert({_id: port.toString()})
+				ActivePorts.insert({ _id: port.toString() })
 				return port
 			}
 		}  

@@ -13,13 +13,13 @@ export default class EnvironmentSelector extends Component {
 
 	render(props) {
 		return ( 
-			<img className="environment_selector" style={this.props.style} src={this.props.img.preview} onClick={this.props.launch} />
+			<img className="environment_selector" style={this.props.style} src={this.props.img} onClick={this.props.launch} />
 		)
 	}
 
 }
 
 EnvironmentSelector.propTypes = {
-	img: PropTypes.object,
+	img: PropTypes.string,
 }
 
