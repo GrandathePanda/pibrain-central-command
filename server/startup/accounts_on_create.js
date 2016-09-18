@@ -34,6 +34,7 @@ Accounts.onCreateUser(function(options, user) {
       Meteor.call('shipyard_request', admin_login, function(err, response) {
 
           if(err) {
+            console.log(Meteor.settings.ADMIN_USERNAME,Meteor.settings.ADMIN_PASSWORD)
             reject(err);
             return
           }
@@ -44,7 +45,7 @@ Accounts.onCreateUser(function(options, user) {
   
   }).then((val) => {
       
-      let auth_token = `${process.env.ADMIN_USERNAME}:${JSON.parse(val.content).auth_token}`
+      let auth_token = `${Meteor.settings.ADMIN_USERNAME}:${JSON.parse(val.content).auth_token}`
       const creation_request = {
         type: "post",
         route: "/api/accounts",

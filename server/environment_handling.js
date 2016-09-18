@@ -27,7 +27,7 @@ export const ngrok_request = {
 				mod_bindings.data.addr = open_port.toString();
 
 				return new Promise((resolve,reject) => {
-					HTTP.call(bindings.type,"http://localhost:4040/"+bindings.route,mod_bindings, 
+					HTTP.call(bindings.type,"http://127.0.0.1:4040/"+bindings.route,mod_bindings, 
 					function(err,response) {
 
 						if(err) {
@@ -45,7 +45,7 @@ export const ngrok_request = {
 		}
 		else {
 			return new Promise((resolve,reject) => {
-				HTTP.call(bindings.type,"http://localhost:4040/"+bindings.route,bindings.request, 
+				HTTP.call(bindings.type,"http://127.0.0.1:4040/"+bindings.route,bindings.request, 
 				function(err,response) {
 
 					if(err) {
@@ -83,7 +83,7 @@ export const shipyard_request = {
 
 		const future = new Future();
 
-		HTTP.call(bindings.type,"http://localhost:8080"+bindings.route, bindings.request, function(err,response) {
+		HTTP.call(bindings.type,"http://127.0.0.1:8080"+bindings.route, bindings.request, function(err,response) {
 
 			if (err) {
 				console.log(err)
@@ -123,7 +123,7 @@ Meteor.methods({
 		return ngrok_request.run.call(this,args)
 	},
 
-	[shipyard_request.name]: function(args) {
+[shipyard_request.name]: function(args) {
 		return  shipyard_request.run.call(this,args)
 	},
 })

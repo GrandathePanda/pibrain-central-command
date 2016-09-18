@@ -48,6 +48,7 @@ Accounts.onLogin(function() {
               resolve(response)
           })
         }).then((val) => { 
+          console.log(val.content)
           Session.set('access_token', user.sy_login.sy_un+":"+JSON.parse(val.content).auth_token)
         })
 

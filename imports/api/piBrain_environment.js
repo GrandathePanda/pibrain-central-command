@@ -58,6 +58,7 @@ export default class PiBrainEnvrionment {
 				resolve(response)
 			})
 		}).then((val) => {
+			console.log(val)
 			 let id = JSON.parse(val.content).Id
 			 this._docker_id = JSON.parse(val.content).Id
 			 let attach_docker_bindings = {
