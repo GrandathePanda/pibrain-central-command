@@ -128,7 +128,7 @@ export default class EnvironmentHandler {
 			  		      //    "CapDrop": ["MKNOD"],
 			  		      //    "GroupAdd": ["newgroup"],
 			  		      //    "RestartPolicy": { "Name": "", "MaximumRetryCount": 0 },
-			  		            "NetworkMode": "host",
+			  		            "NetworkMode": "bridge",
 			  		      //    "Devices": [],
 			  		      //    "Ulimits": [{}],
 			  		      //    "LogConfig": { "Type": "json-file", "Config": {} },
