@@ -1,0 +1,75 @@
+{
+    "id": "n2MRz",
+    "name": "Logging in to piBrain central command.",
+    "content": [
+        {
+            "type": "snippet",
+            "lines": [
+                "   }).then((val) => {",
+                "       ",
+                "       let auth_token = `${Meteor.settings.ADMIN_USERNAME}:${JSON.parse(val.content).auth_token}`",
+                "*      const creation_request = {",
+                "*        type: \"post\",",
+                "*        route: \"/api/accounts\",",
+                "*        request: {",
+                "*          headers: {",
+                "*            'X-Access-Token': auth_token",
+                "*          },",
+                "*          data: {",
+                "*            username: username,",
+                "*            password: password,",
+                "*            roles: [\"containers\",\"images:ro\"]  ",
+                "*          }",
+                "*        }",
+                "*      }   ",
+                "       Meteor.call('shipyard_request', creation_request, function(err, response) {",
+                " ",
+                "             if(err) {"
+            ],
+            "firstLineNumber": 46,
+            "path": "server/startup/accounts_on_create.js",
+            "comments": [
+                "[[sym:./imports/api/environment_collection.js(e0fdbf78-52b9-4c4d-90ad-92f532930312)]]"
+            ]
+        },
+        {
+            "type": "snippet",
+            "lines": [
+                "           return;",
+                "         }",
+                " ",
+                "*        const user_login = {",
+                "*          type: \"post\",",
+                "*          route: \"/auth/login\",",
+                "*          request: {",
+                "*            data: {",
+                "*              username: user.sy_login.sy_un,",
+                "*              password: user.sy_login.sy_pass",
+                "*            }",
+                "*          }",
+                "*        }",
+                "         new Promise((resolve,reject) => {",
+                "           Meteor.call('shipyard_request',user_login, (err, response) => {",
+                "               if(err) {"
+            ],
+            "firstLineNumber": 29,
+            "path": "imports/startup/accounts_on_login.js",
+            "comments": []
+        }
+    ],
+    "symbols": {
+        "e0fdbf78-52b9-4c4d-90ad-92f532930312": {
+            "type": "path",
+            "text": "imports/api/environment_collection.js",
+            "path": "imports/api/environment_collection.js"
+        }
+    },
+    "file_version": "2.0.3",
+    "meta": {
+        "app_version": "0.5.9-1",
+        "file_blobs": {
+            "server/startup/accounts_on_create.js": "3d0c60731021a0498c84e228e09edc525339821e",
+            "imports/startup/accounts_on_login.js": "de3d55da18c8f68eb71e4664c5e3a7d1454d17cc"
+        }
+    }
+}
